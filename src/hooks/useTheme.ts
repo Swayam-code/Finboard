@@ -8,7 +8,12 @@ export const useTheme = () => {
   // Get the actual theme being used (resolves 'auto' to 'light' or 'dark')
   const getResolvedTheme = (): 'light' | 'dark' => {
     if (theme === 'auto') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      // Check if window is available (client-side)
+      if (typeof window !== 'undefined') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      }
+      // Default to dark theme during SSR
+      return 'dark'
     }
     return theme
   }
@@ -17,6 +22,9 @@ export const useTheme = () => {
 
   // Apply theme to document
   useEffect(() => {
+    // Check if we're on the client side
+    if (typeof window === 'undefined') return
+    
     const root = document.documentElement
     const isDark = resolvedTheme === 'dark'
     
@@ -36,6 +44,9 @@ export const useTheme = () => {
   // Listen for system theme changes when in auto mode
   useEffect(() => {
     if (theme !== 'auto') return
+    
+    // Check if we're on the client side
+    if (typeof window === 'undefined') return
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = () => {

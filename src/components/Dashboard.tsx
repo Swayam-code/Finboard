@@ -96,7 +96,7 @@ export function Dashboard() {
                 {/* Clear All Button */}
                 <Button 
                   onClick={() => {
-                    if (window.confirm('Are you sure you want to clear all widgets?')) {
+                    if (typeof window !== 'undefined' && window.confirm('Are you sure you want to clear all widgets?')) {
                       resetDashboard()
                     }
                   }}

@@ -20,7 +20,7 @@ interface DashboardStore extends DashboardState {
 const initialState: DashboardState = {
   widgets: [],
   layout: [],
-  theme: 'auto',
+  theme: 'dark',
   isLoading: false,
   error: undefined,
 }
