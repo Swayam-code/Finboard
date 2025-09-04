@@ -1,27 +1,63 @@
 {
   "name": "finboard",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Customizable real-time finance dashboard with API integration",
   "private": true,
+  "keywords": ["finance", "dashboard", "react", "nextjs", "typescript", "api", "widgets"],
+  "author": "FinBoard Team",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "lint:check": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "rm -rf .next out",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@radix-ui/react-slot": "^1.2.3",
+    "axios": "^1.11.0",
+    "chart.js": "^4.5.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.542.0",
+    "next": "15.5.2",
     "react": "19.1.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "19.1.0",
-    "next": "15.5.2"
+    "recharts": "^3.1.2",
+    "swr": "^2.3.6",
+    "tailwind-merge": "^3.3.1",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/chart.js": "^2.9.41",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
-    "@eslint/eslintrc": "^3"
-  }
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/finboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/finboard/issues"
+  },
+  "homepage": "https://github.com/yourusername/finboard#readme"
 }
