@@ -4,10 +4,10 @@
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.0+-cyan)
-<img width="993" height="783" alt="image" src="https://github.com/user-attachments/assets/7857cae0-11ed-478e-82e7-7ea96a6d17b5" />
-
 
 A powerful, customizable real-time finance dashboard that allows users to connect to various financial APIs and create personalized widgets for monitoring stocks, cryptocurrencies, forex, and other financial data.
+
+<img width="993" height="783" alt="image" src="https://github.com/user-attachments/assets/7857cae0-11ed-478e-82e7-7ea96a6d17b5" />
 
 ## 🚀 Features
 
