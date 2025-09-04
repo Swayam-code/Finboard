@@ -89,6 +89,7 @@ const ConfigurationManager: React.FC = () => {
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
         title="Export Dashboard Configuration"
+        size="lg"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -132,6 +133,7 @@ const ConfigurationManager: React.FC = () => {
           clearError()
         }}
         title="Import Dashboard Configuration"
+        size="lg"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-lg">

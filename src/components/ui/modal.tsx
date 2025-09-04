@@ -48,33 +48,36 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-auto">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
       />
       
-      {/* Modal */}
-      <div className={cn(
-        "relative w-full bg-gray-900 border border-gray-700 rounded-xl shadow-2xl flex flex-col",
-        "animate-in fade-in-0 zoom-in-95 duration-200",
-        sizeClasses[size]
-      )}>
-        {/* Header - Fixed */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-gray-900 rounded-t-xl">
-          <h2 className="text-xl font-semibold text-white">{title}</h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        
-        {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-          {children}
+      {/* Modal Container - Ensures centering even with scroll */}
+      <div className="relative flex items-center justify-center min-h-full w-full">
+        {/* Modal */}
+        <div className={cn(
+          "relative w-full bg-gray-900 border border-gray-700 rounded-xl shadow-2xl flex flex-col my-8",
+          "animate-in fade-in-0 zoom-in-95 duration-200",
+          sizeClasses[size]
+        )}>
+          {/* Header - Fixed */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-700 bg-gray-900 rounded-t-xl">
+            <h2 className="text-xl font-semibold text-white">{title}</h2>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          
+          {/* Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            {children}
+          </div>
         </div>
       </div>
     </div>
