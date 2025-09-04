@@ -48,19 +48,20 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-auto">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
       />
       
-      {/* Modal Container - Ensures centering even with scroll */}
-      <div className="relative flex items-center justify-center min-h-full w-full">
+      {/* Modal Container */}
+      <div className="fixed inset-0 flex items-center justify-center p-4">
         {/* Modal */}
         <div className={cn(
-          "relative w-full bg-gray-900 border border-gray-700 rounded-xl shadow-2xl flex flex-col my-8",
-          "animate-in fade-in-0 zoom-in-95 duration-200",
+          "relative w-full bg-gray-900 border border-gray-700 rounded-xl shadow-2xl flex flex-col",
+          "animate-in fade-in-0 zoom-in-95 duration-200 transform",
+          "max-w-full",
           sizeClasses[size]
         )}>
           {/* Header - Fixed */}
@@ -75,7 +76,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
           </div>
           
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar text-left">
             {children}
           </div>
         </div>
