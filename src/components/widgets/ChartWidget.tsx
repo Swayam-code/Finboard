@@ -25,35 +25,74 @@ export function ChartWidget({ widget }: ChartWidgetProps) {
       if (response.status === 'success') {
         let chartData: any[] = []
         
+        // Helper function to convert string numbers to actual numbers
+        const convertToNumber = (value: any): number | null => {
+          if (typeof value === 'number') return value
+          if (typeof value === 'string') {
+            const num = Number(value.replace(/,/g, '')) // Remove commas and convert
+            return !isNaN(num) ? num : null
+          }
+          return null
+        }
+
+        // Helper function to process data object and convert string numbers
+        const processDataObject = (obj: any): any => {
+          const processed: any = {}
+          for (const [key, value] of Object.entries(obj)) {
+            const numValue = convertToNumber(value)
+            if (numValue !== null) {
+              processed[key] = numValue
+            } else if (typeof value === 'string' || typeof value === 'number') {
+              processed[key] = value // Keep original value for non-numeric strings
+            }
+          }
+          return processed
+        }
+        
         // Try to extract numeric data for charting
         if (Array.isArray(response.data)) {
-          chartData = response.data.slice(0, 20) // Limit to 20 points for performance
+          chartData = response.data.slice(0, 20).map(processDataObject) // Process each item
         } else {
           // Look for arrays in the selected fields
           for (const fieldPath of widget.selectedFields) {
             const value = getNestedValue(response.data, fieldPath)
             if (Array.isArray(value)) {
-              chartData = value.slice(0, 20)
+              chartData = value.slice(0, 20).map(processDataObject)
               break
             }
           }
           
-          // If no arrays found, create a single data point
+          // If no arrays found, create a single data point with current timestamp
           if (chartData.length === 0) {
-            const dataPoint: any = { timestamp: new Date().toISOString() }
+            const dataPoint: any = { 
+              timestamp: new Date().toISOString(),
+              time: new Date().toLocaleTimeString()
+            }
+            
             widget.selectedFields.forEach(field => {
               const value = getNestedValue(response.data, field)
-              if (typeof value === 'string' && !isNaN(Number(value))) {
-                dataPoint[field] = Number(value)
-              } else if (typeof value === 'number') {
-                dataPoint[field] = value
+              const numValue = convertToNumber(value)
+              
+              if (numValue !== null) {
+                // Use the field name without dots for cleaner chart labels
+                const cleanFieldName = field.split('.').pop() || field
+                dataPoint[cleanFieldName] = numValue
               }
             })
-            if (Object.keys(dataPoint).length > 1) {
+            
+            if (Object.keys(dataPoint).length > 2) { // More than just timestamp and time
               chartData = [dataPoint]
             }
           }
         }
+        
+        // Ensure all data points have numeric values for charting
+        chartData = chartData.map(processDataObject).filter(item => {
+          const numericKeys = Object.keys(item).filter(key => 
+            key !== 'timestamp' && key !== 'time' && typeof item[key] === 'number'
+          )
+          return numericKeys.length > 0
+        })
         
         setData(chartData)
         setLastUpdated(new Date().toLocaleTimeString())
@@ -81,13 +120,15 @@ export function ChartWidget({ widget }: ChartWidgetProps) {
     
     const firstItem = data[0]
     return Object.keys(firstItem).filter(key => {
+      if (key === 'timestamp' || key === 'time') return false // Skip timestamp fields
       const value = firstItem[key]
-      return typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)))
+      return typeof value === 'number' || 
+             (typeof value === 'string' && !isNaN(Number(value.replace(/,/g, ''))))
     })
   }
 
   const numericFields = getNumericFields()
-  const chartType = widget.chartType || 'line'
+  const chartType = widget.config?.chartType || 'line'
 
   const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#f97316']
 
@@ -163,14 +204,14 @@ export function ChartWidget({ widget }: ChartWidgetProps) {
   }
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-white">
+    <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4 h-full flex flex-col">
+      {/* Header - Mobile Responsive */}
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <h3 className="text-sm sm:text-lg font-semibold text-white truncate">
             {widget.config?.title || widget.name}
           </h3>
-          <span className="text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded">
+          <span className="text-xs text-gray-500 bg-gray-700 px-2 py-1 rounded hidden sm:inline">
             {widget.refreshInterval}s
           </span>
         </div>
@@ -179,32 +220,36 @@ export function ChartWidget({ widget }: ChartWidgetProps) {
           <button
             onClick={() => fetchData(true)}
             disabled={isRefreshing}
-            className="p-1 text-gray-400 hover:text-white transition-colors"
+            className="p-1.5 sm:p-1 text-gray-400 hover:text-white transition-colors touch-manipulation"
           >
             <RefreshCw 
-              size={16} 
+              size={14} 
               className={isRefreshing ? 'animate-spin' : ''} 
             />
           </button>
           <button
             onClick={() => removeWidget(widget.id)}
-            className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+            className="p-1.5 sm:p-1 text-gray-400 hover:text-red-400 transition-colors touch-manipulation"
           >
-            <Trash2 size={16} />
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
 
-      {/* Chart */}
+      {/* Chart - Responsive height */}
       <div className="flex-1 min-h-0">
         {renderChart()}
       </div>
 
-      {/* Footer */}
+      {/* Footer - Mobile responsive */}
       {widget.config?.showTimestamp && lastUpdated && (
-        <div className="flex items-center gap-1 text-xs text-gray-500 mt-4 pt-3 border-t border-gray-700">
-          <Clock size={12} />
-          <span>Last updated: {lastUpdated}</span>
+        <div className="flex items-center gap-1 text-xs text-gray-500 mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-gray-700">
+          <Clock size={10} className="sm:w-3 sm:h-3" />
+          <span className="truncate">
+            <span className="hidden sm:inline">Last updated: </span>
+            <span className="sm:hidden">Updated: </span>
+            {lastUpdated}
+          </span>
         </div>
       )}
     </div>

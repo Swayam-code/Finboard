@@ -58,6 +58,27 @@ export const dashboardTemplates: DashboardTemplate[] = [
           textColor: '#627688',
           borderColor: '#62768840'
         }
+      },
+      {
+        id: 'crypto-rates-chart',
+        type: 'chart',
+        name: 'Crypto Exchange Rates',
+        title: 'Crypto Exchange Rates',
+        apiUrl: 'https://api.coinbase.com/v2/exchange-rates?currency=BTC',
+        refreshInterval: 60,
+        selectedFields: ['data.rates.USD', 'data.rates.EUR', 'data.rates.GBP'],
+        position: { x: 0, y: 220 },
+        size: { width: 640, height: 300 },
+        config: {
+          title: 'Bitcoin Exchange Rates',
+          chartType: 'line',
+          showLegend: true,
+          showTimestamp: true,
+          backgroundColor: '#1f2937',
+          borderColor: '#f7931a',
+          pointBackgroundColor: '#f7931a',
+          tension: 0.4
+        }
       }
     ]
   },
@@ -71,35 +92,24 @@ export const dashboardTemplates: DashboardTemplate[] = [
     tags: ['forex', 'currency', 'exchange', 'rates'],
     widgets: [
       {
-        id: 'usd-eur',
-        type: 'card',
-        name: 'USD to EUR',
-        title: 'USD/EUR',
+        id: 'usd-rates-chart',
+        type: 'chart',
+        name: 'USD Exchange Rates',
+        title: 'USD Exchange Rates',
         apiUrl: 'https://api.exchangerate-api.com/v4/latest/USD',
         refreshInterval: 60,
-        selectedFields: ['rates.EUR'],
-        displayField: 'rates.EUR',
+        selectedFields: ['rates.EUR', 'rates.GBP', 'rates.JPY', 'rates.CAD', 'rates.AUD'],
         position: { x: 0, y: 0 },
-        size: { width: 250, height: 180 },
+        size: { width: 700, height: 300 },
         config: {
-          title: 'USD/EUR',
-          showTimestamp: true
-        }
-      },
-      {
-        id: 'usd-gbp',
-        type: 'card',
-        name: 'USD to GBP',
-        title: 'USD/GBP',
-        apiUrl: 'https://api.exchangerate-api.com/v4/latest/USD',
-        refreshInterval: 60,
-        selectedFields: ['rates.GBP'],
-        displayField: 'rates.GBP',
-        position: { x: 270, y: 0 },
-        size: { width: 250, height: 180 },
-        config: {
-          title: 'USD/GBP',
-          showTimestamp: true
+          title: 'USD Exchange Rates',
+          chartType: 'line',
+          showLegend: true,
+          showTimestamp: true,
+          backgroundColor: '#1f2937',
+          borderColor: '#3b82f6',
+          pointBackgroundColor: '#3b82f6',
+          tension: 0.4
         }
       },
       {
@@ -110,8 +120,8 @@ export const dashboardTemplates: DashboardTemplate[] = [
         apiUrl: 'https://api.exchangerate-api.com/v4/latest/EUR',
         refreshInterval: 120,
         selectedFields: ['rates.USD', 'rates.GBP', 'rates.JPY', 'rates.AUD', 'rates.CAD'],
-        position: { x: 0, y: 200 },
-        size: { width: 700, height: 400 },
+        position: { x: 0, y: 320 },
+        size: { width: 700, height: 300 },
         config: {
           title: 'EUR Exchange Rates',
           chartType: 'line',

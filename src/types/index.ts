@@ -37,6 +37,10 @@ export interface WidgetConfig {
   isPaused?: boolean
   isMinimized?: boolean
   isExpanded?: boolean
+  chartType?: 'line' | 'bar'
+  showLegend?: boolean
+  tension?: number
+  pointBackgroundColor?: string
 }
 
 export interface ApiField {

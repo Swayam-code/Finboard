@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { useApiStore } from '@/stores/apiStore'
+import { useScreenSize, getResponsiveIconSize } from '@/hooks/useScreenSize'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
@@ -46,6 +47,7 @@ export function WidgetManager({ isOpen, onClose }: WidgetManagerProps) {
 
   const { widgets, removeWidget, updateWidget } = useDashboardStore()
   const { cache, isLoading } = useApiStore()
+  const screenSize = useScreenSize()
 
   // Get widget status
   const getWidgetStatus = (widget: Widget): 'active' | 'paused' | 'error' => {
@@ -214,160 +216,199 @@ export function WidgetManager({ isOpen, onClose }: WidgetManagerProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Widget Manager" size="xl">
-      <div className="space-y-8 max-w-3xl mx-auto">
-        {/* Header Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-          {/* Search */}
-          <div className="relative flex-1 w-full max-w-xs">
+      <div className="space-y-6 sm:space-y-8 max-w-3xl mx-auto">
+        {/* Header Controls - Mobile Responsive */}
+        <div className="flex flex-col gap-3 sm:gap-4 items-stretch sm:items-center sm:flex-row">
+          {/* Search - Full width on mobile */}
+          <div className="relative flex-1 w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <Input
               type="text"
               placeholder="Search widgets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 rounded-lg shadow-sm"
+              className="pl-10 rounded-lg shadow-sm text-sm sm:text-base py-2.5 sm:py-2"
             />
           </div>
 
-          {/* Filter */}
-          <select
-            value={filterBy}
-            onChange={(e) => setFilterBy(e.target.value as FilterBy)}
-            className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white shadow-sm"
-          >
-            <option value="all">All Widgets</option>
-            <option value="active">Active</option>
-            <option value="paused">Paused</option>
-            <option value="error">Error</option>
-          </select>
+          <div className="flex gap-2 sm:gap-3">
+            {/* Filter - Smaller on mobile */}
+            <select
+              value={filterBy}
+              onChange={(e) => setFilterBy(e.target.value as FilterBy)}
+              className="flex-1 sm:flex-none px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white shadow-sm text-sm"
+            >
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="error">Error</option>
+            </select>
 
-          {/* View Mode */}
-          <div className="flex bg-gray-800 rounded-lg p-1 shadow-sm">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-emerald-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-            >
-              <List size={16} />
-            </button>
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
-            >
-              <Grid3x3 size={16} />
-            </button>
+            {/* View Mode - Hidden on very small screens */}
+            <div className="hidden sm:flex bg-gray-800 rounded-lg p-1 shadow-sm">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-emerald-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              >
+                <List size={16} />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-emerald-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              >
+                <Grid3x3 size={16} />
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Bulk Actions */}
+        {/* Bulk Actions - Mobile Responsive */}
         {selectedWidgets.length > 0 && (
-          <div className="flex items-center gap-3 p-4 bg-gray-800 rounded-xl border border-gray-600 shadow-sm justify-center">
+          <div className="flex flex-col sm:flex-row items-center gap-3 p-3 sm:p-4 bg-gray-800 rounded-xl border border-gray-600 shadow-sm">
             <span className="text-sm text-gray-300">
               {selectedWidgets.length} selected
             </span>
-            <div className="flex gap-2">
-              <Button size="sm" variant="ghost" onClick={() => handleBulkAction('pause')} className="text-yellow-400 hover:text-yellow-300">
-                <Pause size={14} className="mr-1" /> Pause
+            <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
+              <Button size="sm" variant="ghost" onClick={() => handleBulkAction('pause')} className="text-yellow-400 hover:text-yellow-300 flex-1 sm:flex-none text-xs sm:text-sm">
+                <Pause size={12} className="mr-1" /> <span className="hidden sm:inline">Pause</span><span className="sm:hidden">⏸</span>
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => handleBulkAction('resume')} className="text-emerald-400 hover:text-emerald-300">
-                <Play size={14} className="mr-1" /> Resume
+              <Button size="sm" variant="ghost" onClick={() => handleBulkAction('resume')} className="text-emerald-400 hover:text-emerald-300 flex-1 sm:flex-none text-xs sm:text-sm">
+                <Play size={12} className="mr-1" /> <span className="hidden sm:inline">Resume</span><span className="sm:hidden">▶</span>
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => handleBulkAction('delete')} className="text-red-400 hover:text-red-300">
-                <Trash2 size={14} className="mr-1" /> Delete
+              <Button size="sm" variant="ghost" onClick={() => handleBulkAction('delete')} className="text-red-400 hover:text-red-300 flex-1 sm:flex-none text-xs sm:text-sm">
+                <Trash2 size={12} className="mr-1" /> <span className="hidden sm:inline">Delete</span><span className="sm:hidden">🗑</span>
               </Button>
             </div>
           </div>
         )}
 
-        {/* Widget List/Grid */}
+        {/* Widget List/Grid - Mobile Responsive */}
         <div className="max-h-[28rem] overflow-y-auto custom-scrollbar">
-          {viewMode === 'list' ? (
-            <div className="space-y-2">
-              {/* Header */}
-              <div className="grid grid-cols-12 gap-4 p-4 bg-gray-800 rounded-xl text-sm font-semibold text-gray-300 shadow-sm">
-                <div className="col-span-1 flex justify-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedWidgets.length === filteredAndSortedWidgets.length && filteredAndSortedWidgets.length > 0}
-                    onChange={handleSelectAll}
-                    className="rounded border-gray-600 bg-gray-800"
-                  />
-                </div>
-                <div className="col-span-3">Name {sortBy === 'name' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
-                <div className="col-span-2">Type {sortBy === 'type' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
-                <div className="col-span-2">Status {sortBy === 'status' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
-                <div className="col-span-2">Updated {sortBy === 'lastUpdated' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
-                <div className="col-span-2">Actions</div>
-              </div>
-              {/* Rows */}
-              {filteredAndSortedWidgets.map((widget) => (
-                <div key={widget.id} className="grid grid-cols-12 gap-4 p-4 bg-gray-800/60 hover:bg-gray-800 rounded-xl transition-colors shadow-sm items-center">
+          {/* Desktop List View */}
+          <div className="hidden lg:block">
+            {viewMode === 'list' ? (
+              <div className="space-y-2">
+                {/* Header */}
+                <div className="grid grid-cols-12 gap-4 p-4 bg-gray-800 rounded-xl text-sm font-semibold text-gray-300 shadow-sm">
                   <div className="col-span-1 flex justify-center">
-                    <input type="checkbox" checked={selectedWidgets.includes(widget.id)} onChange={() => handleSelectWidget(widget.id)} className="rounded border-gray-600 bg-gray-800" />
+                    <input
+                      type="checkbox"
+                      checked={selectedWidgets.length === filteredAndSortedWidgets.length && filteredAndSortedWidgets.length > 0}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-600 bg-gray-800"
+                    />
                   </div>
-                  <div className="col-span-3">
-                    <div className="font-semibold text-white truncate">{widget.name}</div>
-                    <div className="text-xs text-gray-400 truncate">{widget.apiUrl}</div>
-                  </div>
-                  <div className="col-span-2 flex items-center gap-2">{getTypeIcon(widget.type)}<span className="text-sm text-gray-300 capitalize">{widget.type}</span></div>
-                  <div className="col-span-2">{getStatusBadge(widget)}</div>
-                  <div className="col-span-2 text-sm text-gray-400">{formatLastUpdated(widget.apiUrl)}</div>
-                  <div className="col-span-2 flex gap-1">
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" title="Edit widget"><Settings size={14} /></Button>
-                    <Button size="sm" variant="ghost" onClick={() => removeWidget(widget.id)} className="h-7 w-7 p-0 text-gray-400 hover:text-red-400" title="Delete widget"><Trash2 size={14} /></Button>
-                  </div>
+                  <div className="col-span-3">Name {sortBy === 'name' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
+                  <div className="col-span-2">Type {sortBy === 'type' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
+                  <div className="col-span-2">Status {sortBy === 'status' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
+                  <div className="col-span-2">Updated {sortBy === 'lastUpdated' && (sortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />)}</div>
+                  <div className="col-span-2">Actions</div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAndSortedWidgets.map((widget) => (
-                <div key={widget.id} className="p-6 bg-gray-800 rounded-2xl border border-gray-700 hover:border-gray-600 transition-colors shadow-sm flex flex-col justify-between">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
+                {/* Rows */}
+                {filteredAndSortedWidgets.map((widget) => (
+                  <div key={widget.id} className="grid grid-cols-12 gap-4 p-4 bg-gray-800/60 hover:bg-gray-800 rounded-xl transition-colors shadow-sm items-center">
+                    <div className="col-span-1 flex justify-center">
                       <input type="checkbox" checked={selectedWidgets.includes(widget.id)} onChange={() => handleSelectWidget(widget.id)} className="rounded border-gray-600 bg-gray-800" />
-                      {getTypeIcon(widget.type)}
                     </div>
-                    {getStatusBadge(widget)}
+                    <div className="col-span-3">
+                      <div className="font-semibold text-white truncate">{widget.name}</div>
+                      <div className="text-xs text-gray-400 truncate">{widget.apiUrl}</div>
+                    </div>
+                    <div className="col-span-2 flex items-center gap-2">{getTypeIcon(widget.type)}<span className="text-sm text-gray-300 capitalize">{widget.type}</span></div>
+                    <div className="col-span-2">{getStatusBadge(widget)}</div>
+                    <div className="col-span-2 text-sm text-gray-400">{formatLastUpdated(widget.apiUrl)}</div>
+                    <div className="col-span-2 flex gap-1">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" title="Edit widget"><Settings size={14} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => removeWidget(widget.id)} className="h-7 w-7 p-0 text-gray-400 hover:text-red-400" title="Delete widget"><Trash2 size={14} /></Button>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-white truncate">{widget.name}</h3>
-                    <p className="text-xs text-gray-400 truncate">{widget.apiUrl}</p>
-                    <p className="text-xs text-gray-500">Updated: {formatLastUpdated(widget.apiUrl)}</p>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredAndSortedWidgets.map((widget) => (
+                  <div key={widget.id} className="p-6 bg-gray-800 rounded-2xl border border-gray-700 hover:border-gray-600 transition-colors shadow-sm flex flex-col justify-between">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={selectedWidgets.includes(widget.id)} onChange={() => handleSelectWidget(widget.id)} className="rounded border-gray-600 bg-gray-800" />
+                        {getTypeIcon(widget.type)}
+                      </div>
+                      {getStatusBadge(widget)}
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-white truncate">{widget.name}</h3>
+                      <p className="text-xs text-gray-400 truncate">{widget.apiUrl}</p>
+                      <p className="text-xs text-gray-500">Updated: {formatLastUpdated(widget.apiUrl)}</p>
+                    </div>
+                    <div className="flex justify-end gap-1 mt-3">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" title="Edit widget"><Settings size={14} /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => removeWidget(widget.id)} className="h-7 w-7 p-0 text-gray-400 hover:text-red-400" title="Delete widget"><Trash2 size={14} /></Button>
+                    </div>
                   </div>
-                  <div className="flex justify-end gap-1 mt-3">
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-white" title="Edit widget"><Settings size={14} /></Button>
-                    <Button size="sm" variant="ghost" onClick={() => removeWidget(widget.id)} className="h-7 w-7 p-0 text-gray-400 hover:text-red-400" title="Delete widget"><Trash2 size={14} /></Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {filteredAndSortedWidgets.map((widget) => (
+              <div key={widget.id} className="p-4 bg-gray-800 rounded-lg border border-gray-700 shadow-sm">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedWidgets.includes(widget.id)} 
+                      onChange={() => handleSelectWidget(widget.id)} 
+                      className="rounded border-gray-600 bg-gray-800" 
+                    />
+                    {getTypeIcon(widget.type)}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-white truncate text-sm">{widget.name}</h3>
+                      <p className="text-xs text-gray-400 truncate">{widget.apiUrl}</p>
+                    </div>
+                  </div>
+                  {getStatusBadge(widget)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Updated: {formatLastUpdated(widget.apiUrl)}</span>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-gray-400 hover:text-white touch-manipulation" title="Edit widget">
+                      <Settings size={14} />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => removeWidget(widget.id)} className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 touch-manipulation" title="Delete widget">
+                      <Trash2 size={14} />
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
 
           {/* Empty State */}
           {filteredAndSortedWidgets.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="mb-6">
-                <div className="mx-auto w-20 h-20 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-full flex items-center justify-center">
-                  <Search className="text-emerald-500" size={40} />
+            <div className="flex flex-col items-center justify-center py-12 sm:py-16">
+              <div className="mb-4 sm:mb-6">
+                <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 rounded-full flex items-center justify-center">
+                  <Search className="text-emerald-500" size={getResponsiveIconSize(screenSize, 32, 40)} />
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">No widgets found</h3>
-              <p className="text-gray-400 text-lg mb-4">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">No widgets found</h3>
+              <p className="text-gray-400 text-sm sm:text-lg mb-4 text-center px-4">
                 {searchTerm || filterBy !== 'all' ? 'Try adjusting your search or filter criteria.' : 'Create your first widget to get started!'}
               </p>
-              <Button onClick={onClose} className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-2 text-white font-semibold rounded-lg shadow-lg">
+              <Button onClick={onClose} className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 sm:px-6 py-2 text-white font-semibold rounded-lg shadow-lg">
                 Close
               </Button>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-between items-center pt-6 border-t border-gray-700">
-          <div className="text-sm text-gray-400">
+        {/* Footer - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 pt-4 sm:pt-6 border-t border-gray-700">
+          <div className="text-xs sm:text-sm text-gray-400">
             {filteredAndSortedWidgets.length} of {widgets.length} widgets
           </div>
-          <Button variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white">
+          <Button variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white w-full sm:w-auto">
             Close
           </Button>
         </div>

@@ -103,17 +103,17 @@ export function IntegratedWidget({ widget, onRemove, dragHandleProps, isDragging
     if (!widgetData) return null
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {widget.selectedFields.map((field, index) => {
           const value = getNestedValue(widgetData, field)
           const fieldName = field.split('.').pop() || field
           
           return (
             <div key={index} className="flex justify-between items-center">
-              <span className="text-sm text-gray-400 capitalize">
+              <span className="text-xs sm:text-sm text-gray-400 capitalize truncate pr-2">
                 {fieldName.replace('_', ' ')}
               </span>
-              <span className="text-lg font-semibold text-white font-mono">
+              <span className="text-base sm:text-lg font-semibold text-white font-mono text-right">
                 {typeof value === 'number' 
                   ? new Intl.NumberFormat('en-US', {
                       minimumFractionDigits: 2,
@@ -526,7 +526,7 @@ export function IntegratedWidget({ widget, onRemove, dragHandleProps, isDragging
   return (
     <>
       <Card 
-        className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 h-96 flex flex-col ${
+        className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/10 h-80 sm:h-96 flex flex-col ${
           isDragging 
             ? 'shadow-2xl shadow-emerald-500/20 ring-2 ring-emerald-500/50 scale-105' 
             : 'hover:ring-1 hover:ring-emerald-500/30'
@@ -534,28 +534,33 @@ export function IntegratedWidget({ widget, onRemove, dragHandleProps, isDragging
           isMinimized ? 'opacity-75' : ''
         }`}
       >
-      {/* Header */}
-      <CardHeader className="pb-3">
+      {/* Header - Mobile Optimized */}
+      <CardHeader className="pb-2 sm:pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-base font-semibold text-white truncate">
+            <CardTitle className="text-sm sm:text-base font-semibold text-white truncate">
               {widget.config?.title || widget.name}
             </CardTitle>
             
             <div className="flex items-center gap-2 mt-1">
               <div className={`flex items-center gap-1 text-xs ${getStatusColor()}`}>
                 {getStatusIcon()}
-                <span>
+                <span className="hidden sm:inline">
                   {refreshError ? 'Error' : 
                    isDataLoading || isRefreshing ? 'Updating...' : 
                    widgetData ? 'Live' : 'Idle'}
+                </span>
+                <span className="sm:hidden">
+                  {refreshError ? 'Err' : 
+                   isDataLoading || isRefreshing ? '...' : 
+                   widgetData ? '●' : '○'}
                 </span>
               </div>
               
               {widget.config?.showTimestamp && (
                 <>
-                  <span className="text-gray-600">•</span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-gray-600 hidden sm:inline">•</span>
+                  <span className="text-xs text-gray-400 hidden sm:inline">
                     {formatLastUpdated()}
                   </span>
                 </>
@@ -563,28 +568,28 @@ export function IntegratedWidget({ widget, onRemove, dragHandleProps, isDragging
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {/* Minimize/Maximize */}
+          {/* Actions - Mobile Optimized */}
+          <div className="flex items-center gap-0.5 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            {/* Minimize/Maximize - Hidden on very small screens */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsMinimized(!isMinimized)}
-              className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+              className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700 hidden sm:flex"
               title={isMinimized ? 'Show widget' : 'Minimize widget'}
             >
-              {isMinimized ? <Eye size={14} /> : <EyeOff size={14} />}
+              {isMinimized ? <Eye size={12} /> : <EyeOff size={12} />}
             </Button>
 
-            {/* Expand */}
+            {/* Expand - Hidden on small screens */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
-              className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+              className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700 hidden md:flex"
               title="Expand to full screen"
             >
-              <Maximize2 size={14} />
+              <Maximize2 size={12} />
             </Button>
 
             {/* Refresh */}
@@ -593,10 +598,10 @@ export function IntegratedWidget({ widget, onRemove, dragHandleProps, isDragging
               size="sm"
               onClick={() => handleRefresh()}
               disabled={isRefreshing}
-              className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700"
+              className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-gray-400 hover:text-white hover:bg-gray-700 touch-manipulation"
               title="Refresh data"
             >
-              <RefreshCw className={isRefreshing ? 'animate-spin' : ''} size={14} />
+              <RefreshCw className={isRefreshing ? 'animate-spin' : ''} size={12} />
             </Button>
 
             {/* Remove */}
@@ -604,19 +609,19 @@ export function IntegratedWidget({ widget, onRemove, dragHandleProps, isDragging
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="h-7 w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-gray-700"
+              className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-gray-400 hover:text-red-400 hover:bg-gray-700 touch-manipulation"
               title="Remove widget"
             >
-              <Trash2 size={14} />
+              <Trash2 size={12} />
             </Button>
 
-            {/* Drag Handle */}
+            {/* Drag Handle - Larger touch target on mobile */}
             <div
               {...dragHandleProps}
-              className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-white transition-colors"
+              className="cursor-grab active:cursor-grabbing p-1 sm:p-1 text-gray-400 hover:text-white transition-colors touch-manipulation min-w-6 min-h-6"
               title="Drag to reorder"
             >
-              <GripVertical size={14} />
+              <GripVertical size={12} className="sm:w-3.5 sm:h-3.5" />
             </div>
           </div>
         </div>

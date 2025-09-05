@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useDashboardStore } from '@/stores/dashboardStore'
 import { useApiStore } from '@/stores/apiStore'
+import { useScreenSize, getResponsiveIconSize } from '@/hooks/useScreenSize'
 import { WidgetType, ApiField } from '@/types'
 import { Search, Plus, Trash2, TestTube, Zap, Clock, CheckCircle, XCircle, Loader2, TrendingUp, DollarSign, BarChart3, Globe } from 'lucide-react'
 
@@ -64,6 +65,7 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
 
   const addWidget = useDashboardStore((state) => state.addWidget)
   const { testApiConnection, isLoading } = useApiStore()
+  const screenSize = useScreenSize()
 
   const handleTestConnection = async () => {
     if (!apiUrl.trim()) return
@@ -166,18 +168,18 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="" size="lg">
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="text-center pb-6 border-b border-gray-700">
-          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Plus className="text-white" size={24} />
+      <div className="space-y-6 sm:space-y-8">
+        {/* Header - Mobile Optimized */}
+        <div className="text-center pb-4 sm:pb-6 border-b border-gray-700">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+            <Plus className="text-white" size={getResponsiveIconSize(screenSize, 20, 24)} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Create New Widget</h2>
-          <p className="text-gray-400">Connect to any API and visualize your data</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Create New Widget</h2>
+          <p className="text-sm sm:text-base text-gray-400 px-2">Connect to any API and visualize your data</p>
         </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-8">
+        {/* Progress Steps - Mobile Responsive */}
+        <div className="flex items-center justify-center mb-6 sm:mb-8">
           {[
             { num: 1, label: 'Setup' },
             { num: 2, label: 'Test' },
@@ -185,25 +187,25 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
           ].map((stepInfo, index) => (
             <div key={stepInfo.num} className="flex items-center">
               <div className="flex flex-col items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-300 ${
                   step >= stepInfo.num 
                     ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg transform scale-105' 
                     : 'bg-gray-700 text-gray-400'
                 }`}>
                   {step > stepInfo.num ? (
-                    <CheckCircle size={20} />
+                    <CheckCircle size={getResponsiveIconSize(screenSize, 16, 20)} />
                   ) : (
                     stepInfo.num
                   )}
                 </div>
-                <span className={`text-xs mt-2 transition-colors ${
+                <span className={`text-xs mt-1 sm:mt-2 transition-colors ${
                   step >= stepInfo.num ? 'text-green-400' : 'text-gray-500'
                 }`}>
                   {stepInfo.label}
                 </span>
               </div>
               {index < 2 && (
-                <div className={`w-20 h-0.5 mx-4 mt-[-20px] transition-colors duration-300 ${
+                <div className={`w-12 sm:w-20 h-0.5 mx-2 sm:mx-4 mt-[-20px] transition-colors duration-300 ${
                   step > stepInfo.num ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gray-700'
                 }`} />
               )}
@@ -229,7 +231,7 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
                     <Zap className="inline mr-2" size={16} />
                     Quick Start with Pre-configured APIs
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                  <div className="grid grid-cols-1 gap-3 mb-6">
                     {preConfiguredApis.map((api, index) => {
                       const Icon = api.icon
                       const colorClasses = {
@@ -242,17 +244,15 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
                         <button
                           key={index}
                           onClick={() => handlePreConfiguredSelect(api)}
-                          className={`p-4 text-left bg-gradient-to-r ${colorClasses[api.color as keyof typeof colorClasses]} rounded-lg transition-all duration-200 hover:shadow-lg hover:transform hover:scale-105 group`}
+                          className={`p-3 sm:p-4 text-left bg-gradient-to-r ${colorClasses[api.color as keyof typeof colorClasses]} rounded-lg transition-all duration-200 hover:shadow-lg hover:transform hover:scale-105 group w-full`}
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center mb-2">
-                                <Icon className="text-white mr-2" size={18} />
-                                <span className="font-semibold text-white group-hover:text-gray-100">
-                                  {api.name}
-                                </span>
+                                <Icon className="text-white mr-2" size={16} />
+                                <span className="text-white font-semibold text-sm sm:text-base">{api.name}</span>
                               </div>
-                              <p className="text-white/80 text-sm leading-relaxed">
+                              <p className="text-white/80 text-xs sm:text-sm leading-relaxed">
                                 {api.description}
                               </p>
                             </div>
@@ -539,24 +539,25 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
         )}
 
         {/* Actions */}
-        <div className="flex justify-between items-center pt-8 border-t border-gray-700">
-          <div className="flex gap-3">
+        {/* Footer - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 pt-6 sm:pt-8 border-t border-gray-700">
+          <div className="flex gap-3 order-2 sm:order-1">
             {step > 1 && (
               <Button
                 variant="ghost"
                 onClick={() => setStep(step - 1)}
-                className="text-gray-400 hover:text-white hover:bg-gray-800 px-6 py-2 rounded-lg transition-colors"
+                className="text-gray-400 hover:text-white hover:bg-gray-800 px-4 sm:px-6 py-2 rounded-lg transition-colors text-sm sm:text-base flex-1 sm:flex-none"
               >
                 ← Back
               </Button>
             )}
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 order-1 sm:order-2">
             <Button 
               variant="ghost" 
               onClick={handleClose}
-              className="text-gray-400 hover:text-white hover:bg-gray-800 px-6 py-2 rounded-lg transition-colors"
+              className="text-gray-400 hover:text-white hover:bg-gray-800 px-4 sm:px-6 py-2 rounded-lg transition-colors text-sm sm:text-base flex-1 sm:flex-none"
             >
               Cancel
             </Button>
@@ -565,17 +566,19 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
               <Button
                 onClick={() => step === 2 ? handleTestConnection() : setStep(step + 1)}
                 disabled={!canProceedToNext()}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 sm:px-8 py-2 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base flex-1 sm:flex-none"
               >
                 {step === 2 ? (
                   <>
-                    <Plus className="mr-2" size={16} />
-                    Test & Continue
+                    <Plus className="mr-1 sm:mr-2" size={14} />
+                    <span className="hidden sm:inline">Test & Continue</span>
+                    <span className="sm:hidden">Test</span>
                   </>
                 ) : (
                   <>
-                    Next Step
-                    <span className="ml-2">→</span>
+                    <span className="hidden sm:inline">Next Step</span>
+                    <span className="sm:hidden">Next</span>
+                    <span className="ml-1 sm:ml-2">→</span>
                   </>
                 )}
               </Button>
@@ -583,10 +586,11 @@ export function AddWidgetModal({ isOpen, onClose }: AddWidgetModalProps) {
               <Button
                 onClick={handleAddWidget}
                 disabled={selectedFields.length === 0}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg text-sm sm:text-base flex-1 sm:flex-none"
               >
-                <Plus className="mr-2" size={18} />
-                Create Widget
+                <Plus className="mr-1 sm:mr-2" size={16} />
+                <span className="hidden sm:inline">Create Widget</span>
+                <span className="sm:hidden">Create</span>
               </Button>
             )}
           </div>
