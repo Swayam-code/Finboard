@@ -61,9 +61,9 @@ export function WidgetManager({ isOpen, onClose }: WidgetManagerProps) {
     let filtered = widgets.filter(widget => {
       // Search filter
       const matchesSearch = !searchTerm || 
-        widget.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        widget.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        widget.apiUrl.toLowerCase().includes(searchTerm.toLowerCase())
+        (widget.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (widget.type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (widget.apiUrl || '').toLowerCase().includes(searchTerm.toLowerCase())
 
       // Status filter
       const status = getWidgetStatus(widget)
@@ -78,12 +78,12 @@ export function WidgetManager({ isOpen, onClose }: WidgetManagerProps) {
 
       switch (sortBy) {
         case 'name':
-          aValue = a.name.toLowerCase()
-          bValue = b.name.toLowerCase()
+          aValue = (a.name || '').toLowerCase()
+          bValue = (b.name || '').toLowerCase()
           break
         case 'type':
-          aValue = a.type
-          bValue = b.type
+          aValue = a.type || ''
+          bValue = b.type || ''
           break
         case 'created':
           aValue = a.id // Using ID as proxy for creation time

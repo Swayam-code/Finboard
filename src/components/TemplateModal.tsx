@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
 import { 
-  DASHBOARD_TEMPLATES, 
+  dashboardTemplates, 
   TEMPLATE_CATEGORIES, 
   createWidgetsFromTemplate,
   getTemplatesByCategory,
@@ -31,7 +31,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
   const { addWidget, setLoading } = useDashboardStore()
 
   const getFilteredTemplates = () => {
-    let templates = DASHBOARD_TEMPLATES
+    let templates = dashboardTemplates
 
     if (selectedCategory !== 'all') {
       templates = getTemplatesByCategory(selectedCategory)
@@ -152,7 +152,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
           {/* Results Summary */}
           <div className="mt-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <span>
-              Showing {filteredTemplates.length} of {DASHBOARD_TEMPLATES.length} templates
+              Showing {filteredTemplates.length} of {dashboardTemplates.length} templates
               {searchQuery && ` for "${searchQuery}"`}
               {selectedCategory !== 'all' && ` in ${TEMPLATE_CATEGORIES.find(c => c.id === selectedCategory)?.name}`}
             </span>
@@ -201,13 +201,13 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
                         <span>•</span>
                         <span className="flex items-center gap-1">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          {template.estimatedSetupTime}m setup
+                          {template.estimatedSetupTime || 5}m setup
                         </span>
                       </div>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getDifficultyBadge(template.difficulty)}`}>
-                    {template.difficulty}
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getDifficultyBadge(template.difficulty || 'beginner')}`}>
+                    {template.difficulty || 'beginner'}
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -218,7 +218,7 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
               {/* Template Details */}
               <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {template.tags.slice(0, 3).map((tag, index) => (
+                  {(template.tags || ['demo', 'basic']).slice(0, 3).map((tag, index) => (
                     <span
                       key={tag}
                       className={`px-3 py-1.5 text-xs font-medium rounded-full border ${
@@ -232,9 +232,9 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
                       {tag}
                     </span>
                   ))}
-                  {template.tags.length > 3 && (
+                  {(template.tags || []).length > 3 && (
                     <span className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full border border-gray-200 dark:border-gray-600">
-                      +{template.tags.length - 3} more
+                      +{(template.tags || []).length - 3} more
                     </span>
                   )}
                 </div>
@@ -319,13 +319,13 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Difficulty:</span>
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getDifficultyBadge(selectedTemplate.difficulty)}`}>
-                        {selectedTemplate.difficulty}
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getDifficultyBadge(selectedTemplate.difficulty || 'beginner')}`}>
+                        {selectedTemplate.difficulty || 'beginner'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Setup Time:</span>
-                      <span className="text-gray-900 dark:text-white">{selectedTemplate.estimatedSetupTime} minutes</span>
+                      <span className="text-gray-900 dark:text-white">{selectedTemplate.estimatedSetupTime || 5} minutes</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-400">Category:</span>
@@ -369,26 +369,26 @@ const TemplateModal: React.FC<TemplateModalProps> = ({ isOpen, onClose }) => {
                 <div>
                   <h4 className="font-medium text-gray-900 dark:text-white mb-3">Included Widgets</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {selectedTemplate.widgets.map((widget, index) => (
+                    {selectedTemplate.widgets.map((widget: any, index: number) => (
                       <div key={index} className="flex items-center gap-3 p-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                         <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded flex items-center justify-center text-sm">
-                          {widget.type === 'card' && '📊'}
+                          {widget.type === 'metric' && '📊'}
                           {widget.type === 'table' && '📋'}
                           {widget.type === 'chart' && '📈'}
+                          {widget.type === 'list' && '📝'}
+                          {widget.type === 'text' && '📄'}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {widget.name}
+                            {widget.title || widget.name || 'Widget'}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                             {widget.type} widget
                           </div>
                         </div>
-                        {widget.webSocket?.enabled && (
-                          <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded">
-                            Live
-                          </span>
-                        )}
+                        <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded">
+                          Live
+                        </span>
                       </div>
                     ))}
                   </div>

@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 // Helper function to wait for a specified amount of time
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-// Helper function to make requests with retry logic
-async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 1000) {
+// Helper function to make requests with retry logic for real APIs only
+async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 2000) {
   let lastError: Error | null = null
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -16,6 +16,7 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 1000) {
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'FinBoard/1.0',
+          'Cache-Control': 'no-cache',
         },
       })
       
@@ -30,14 +31,8 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 1000) {
           await sleep(delay)
           continue
         } else {
-          // Return mock data for rate limiting if all retries exhausted
-          console.log('All retries exhausted for rate limiting. Returning mock data.')
-          return {
-            ok: true,
-            status: 200,
-            json: async () => getMockData(url),
-            headers: new Headers({ 'X-Data-Source': 'rate-limit-fallback' })
-          } as Response
+          // Throw error instead of returning mock data
+          throw new Error(`Rate limited after ${maxRetries} retries. Please try again later.`)
         }
       }
       
@@ -46,8 +41,8 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 1000) {
         const errorMsg = `HTTP error! status: ${response.status} ${response.statusText}`
         console.log('Response not OK:', errorMsg)
         
-        // For non-retryable errors, throw immediately
-        if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+        // For client errors (4xx), throw immediately
+        if (response.status >= 400 && response.status < 500) {
           throw new Error(errorMsg)
         }
         
@@ -62,7 +57,7 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 1000) {
         }
       }
       
-      // Success
+      // Success - return real data only
       return response
       
     } catch (error) {
@@ -77,54 +72,8 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 1000) {
     }
   }
   
-  // If all retries failed, return mock data as fallback
-  console.log('All retries failed. Returning mock data as fallback.')
-  return {
-    ok: true,
-    status: 200,
-    json: async () => getMockData(url)
-  }
-}
-
-// Generate mock data based on the URL
-function getMockData(url: string) {
-  if (url.includes('coingecko.com')) {
-    if (url.includes('bitcoin')) {
-      return { bitcoin: { usd: 43250.00, usd_24h_change: 2.5, usd_market_cap: 845000000000 } }
-    } else if (url.includes('ethereum')) {
-      return { ethereum: { usd: 2640.50, usd_24h_change: 1.8, usd_market_cap: 317000000000 } }
-    } else if (url.includes('cardano')) {
-      return { cardano: { usd: 0.365, usd_24h_change: -0.5 } }
-    } else if (url.includes('coins/markets')) {
-      return [
-        { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', current_price: 43250, price_change_percentage_24h: 2.5, market_cap: 845000000000 },
-        { id: 'ethereum', symbol: 'eth', name: 'Ethereum', current_price: 2640, price_change_percentage_24h: 1.8, market_cap: 317000000000 },
-        { id: 'cardano', symbol: 'ada', name: 'Cardano', current_price: 0.365, price_change_percentage_24h: -0.5, market_cap: 12000000000 }
-      ]
-    }
-  } else if (url.includes('exchangerate-api.com')) {
-    return {
-      result: 'success',
-      conversion_rates: {
-        EUR: 0.92,
-        GBP: 0.79,
-        JPY: 149.50,
-        CAD: 1.36,
-        AUD: 1.53
-      }
-    }
-  } else if (url.includes('alphavantage.co')) {
-    return {
-      'Global Quote': {
-        '01. symbol': 'AAPL',
-        '05. price': '175.25',
-        '09. change': '2.15',
-        '10. change percent': '1.24%'
-      }
-    }
-  }
-  
-  return { message: 'Mock data - API temporarily unavailable', timestamp: new Date().toISOString() }
+  // If all retries failed, throw the last error - NO MOCK DATA
+  throw lastError || new Error('All retries failed')
 }
 
 export async function GET(request: NextRequest) {
@@ -146,32 +95,37 @@ export async function GET(request: NextRequest) {
     new URL(url) // This will throw if URL is invalid
     console.log('URL is valid, making fetch request with retry logic...')
     
-    const response = await fetchWithRetry(url, 2, 1000) // 2 retries, 1 second base delay
+    const response = await fetchWithRetry(url, 3, 2000) // 3 retries, 2 second base delay
     const data = await response.json()
-    console.log('Successfully fetched data')
+    console.log('Successfully fetched real data from API')
     
     return NextResponse.json(data, {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'X-Data-Source': 'real-api'
       },
     })
   } catch (error) {
     console.error('Proxy error details:', error)
     
-    // Return mock data as final fallback
-    console.log('Returning mock data as final fallback')
-    const mockData = getMockData(url)
-    
-    return NextResponse.json(mockData, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'X-Data-Source': 'mock-fallback'
+    // Return proper error instead of mock data
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch data from API',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       },
-    })
+      { 
+        status: 503,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      }
+    )
   }
 }
 
