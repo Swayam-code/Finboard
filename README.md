@@ -336,17 +336,6 @@ If you encounter any issues or have questions:
 3. Create a new issue with detailed information
 4. Join our community discussions
 
-## 🗺️ Roadmap
-
-### Upcoming Features
-- [ ] WebSocket support for real-time data
-- [ ] Widget templates marketplace
-- [ ] Data export functionality
-- [ ] Advanced charting options
-- [ ] Multi-dashboard support
-- [ ] Collaborative features
-- [ ] Mobile app companion
-
 ### Version History
 - **v1.0.0** - Initial release with core functionality
 - **v1.1.0** - Drag & drop support (planned)
