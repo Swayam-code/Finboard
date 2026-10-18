@@ -40,7 +40,7 @@ This document provides examples of how to integrate with popular financial APIs 
 ## APIs Requiring Registration (Free Tier)
 
 ### 1. Alpha Vantage
-**URL**: `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=YOUR_API_KEY`
+**URL**: `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL`
 **Type**: Stock Market
 **Rate Limit**: 5 requests/minute, 500 requests/day
 **Best For**: Card widgets
@@ -52,7 +52,7 @@ This document provides examples of how to integrate with popular financial APIs 
 - `Global Quote.10. change percent` - Percentage change
 
 ### 2. Finnhub
-**URL**: `https://finnhub.io/api/v1/quote?symbol=AAPL&token=YOUR_API_KEY`
+**URL**: `https://finnhub.io/api/v1/quote?symbol=AAPL`
 **Type**: Stock Market
 **Rate Limit**: 60 requests/minute
 **Best For**: Card widgets
@@ -65,7 +65,7 @@ This document provides examples of how to integrate with popular financial APIs 
 - `pc` - Previous close price
 
 ### 3. Polygon.io
-**URL**: `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?adjusted=true&apikey=YOUR_API_KEY`
+**URL**: `https://api.polygon.io/v2/aggs/ticker/AAPL/prev?adjusted=true`
 **Type**: Stock Market
 **Rate Limit**: 5 requests/minute (free)
 **Best For**: Chart widgets
@@ -99,7 +99,7 @@ This document provides examples of how to integrate with popular financial APIs 
 {
   "name": "My Stocks",
   "type": "table", 
-  "apiUrl": "https://finnhub.io/api/v1/quote?symbol=AAPL&token=YOUR_API_KEY",
+  "apiUrl": "https://finnhub.io/api/v1/quote?symbol=AAPL",
   "refreshInterval": 60,
   "selectedFields": [
     "c",

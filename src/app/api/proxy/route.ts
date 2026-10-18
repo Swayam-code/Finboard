@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+let windowStart = Date.now()
+let credentialRequests = 0
+
 // Helper function to wait for a specified amount of time
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -9,10 +12,12 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 2000) {
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Attempt ${attempt + 1} for URL: ${url}`)
+      // Never log provider URLs: they may contain credentials.
       
       const response = await fetch(url, {
         method: 'GET',
+        redirect: 'error',
+        signal: AbortSignal.timeout(10000),
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'FinBoard/1.0',
@@ -61,7 +66,7 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 2000) {
       return response
       
     } catch (error) {
-      console.error(`Attempt ${attempt + 1} failed:`, error)
+      console.error(`Provider request attempt ${attempt + 1} failed`)
       lastError = error instanceof Error ? error : new Error('Unknown error')
       
       if (attempt < maxRetries) {
@@ -79,8 +84,7 @@ async function fetchWithRetry(url: string, maxRetries = 3, baseDelay = 2000) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const url = searchParams.get('url')
-  
-  console.log('Proxy API called with URL:', url)
+
   
   if (!url) {
     console.log('No URL provided')
@@ -92,14 +96,45 @@ export async function GET(request: NextRequest) {
   
   try {
     // Validate URL
-    new URL(url) // This will throw if URL is invalid
+    const target = new URL(url)
+    // Only exact HTTPS provider origins may receive server credentials.
+    if (target.protocol !== 'https:' || target.port || target.username || target.password) {
+      return NextResponse.json({ error: 'Unsupported provider URL' }, { status: 400 })
+    }
+    const providers: Record<string, [string, string]> = {
+      'www.alphavantage.co': ['ALPHA_VANTAGE_API_KEY', 'apikey'],
+      'finnhub.io': ['FINNHUB_API_KEY', 'token'],
+      'api.polygon.io': ['POLYGON_API_KEY', 'apiKey'],
+    }
+    const provider = providers[target.hostname]
+    if (provider) {
+      const allowed = target.hostname === 'www.alphavantage.co'
+        ? target.pathname === '/query' && ['GLOBAL_QUOTE', 'OVERVIEW', 'TOP_GAINERS_LOSERS'].includes(target.searchParams.get('function') || '')
+        : target.hostname === 'finnhub.io'
+          ? ['/api/v1/quote', '/api/v1/stock/profile2', '/api/v1/crypto/candle', '/api/v1/news'].includes(target.pathname)
+          : /^\/v2\/aggs\/ticker\/[A-Za-z0-9._-]+\/prev$/.test(target.pathname)
+      if (!allowed) return NextResponse.json({ error: 'Unsupported provider endpoint' }, { status: 400 })
+      if (Date.now() - windowStart >= 60000) { windowStart = Date.now(); credentialRequests = 0 }
+      if (++credentialRequests > 30) return NextResponse.json({ error: 'Provider request limit reached' }, { status: 429 })
+      const [variable, parameter] = provider
+      const key = process.env[variable]
+      if (!key) return NextResponse.json({ error: 'Provider is not configured' }, { status: 503 })
+      for (const name of Array.from(target.searchParams.keys())) {
+        if (/^(apikey|token|access_key)$/i.test(name)) target.searchParams.delete(name)
+      }
+      target.searchParams.set(parameter, key)
+    }
+
     console.log('URL is valid, making fetch request with retry logic...')
     
-    const response = await fetchWithRetry(url, 3, 2000) // 3 retries, 2 second base delay
+    const response = await fetchWithRetry(target.toString(), 3, 2000) // 3 retries, 2 second base delay
     const data = await response.json()
-    console.log('Successfully fetched real data from API')
+    if (data.error || data.Error || data['Error Message']) throw new Error('Provider error')
     
-    return NextResponse.json(data, {
+    const key = provider ? process.env[provider[0]] : undefined
+    const serialized = JSON.stringify(data)
+    const safeData = key ? JSON.parse(serialized.split(key).join('[redacted]').split(encodeURIComponent(key)).join('[redacted]')) : data
+    return NextResponse.json(safeData, {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -108,13 +143,13 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Proxy error details:', error)
+    console.error('Provider request failed')
     
     // Return proper error instead of mock data
     return NextResponse.json(
       { 
         error: 'Failed to fetch data from API',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Provider request failed. Check server configuration and provider availability.',
         timestamp: new Date().toISOString()
       },
       { 
