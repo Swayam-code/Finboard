@@ -105,7 +105,7 @@ https://api.coinbase.com/v2/exchange-rates?currency=BTC
 
 #### Stock Market (Alpha Vantage) - Requires API Key
 ```
-https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=YOUR_API_KEY
+https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL
 ```
 
 #### Indian Stock Market (IndianAPI)
@@ -226,8 +226,8 @@ Handles all API-related operations:
 Create a `.env.local` file for API keys:
 
 ```env
-NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
-NEXT_PUBLIC_FINNHUB_API_KEY=your_finnhub_key
+ALPHA_VANTAGE_API_KEY=your_alpha_vantage_key
+FINNHUB_API_KEY=your_finnhub_key
 ```
 
 ### Customization Options
@@ -344,3 +344,11 @@ If you encounter any issues or have questions:
 ---
 
 Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
+
+## Server credential setup
+
+Copy `.env.example` to `.env.local` and set the server-only `ALPHA_VANTAGE_API_KEY`, `FINNHUB_API_KEY`, and `POLYGON_API_KEY` for the providers you use. Set the same variables in your hosting environment and redeploy. Do not use `NEXT_PUBLIC_` variables for credentials or paste keys into widget URLs: widget configuration is saved in browser storage and may be exported.
+
+Built-in widgets now send credential-free provider URLs through `/api/proxy`. The server injects credentials only for supported HTTPS provider endpoints and refuses redirects. Custom public API URLs continue through the existing proxy without receiving server credentials. Existing saved dashboards/exports may contain old keys; remove credential query parameters from those URLs and replace any shared exports. Clear old browser storage if starting fresh.
+
+Rotate the previously committed Finnhub and Polygon keys. Rotate any Alpha Vantage key deployed through the old public variable. Repository history and previously built browser bundles still contain old values; merging this fix does not revoke them. Credential-backed requests have a modest per-instance fixed-window cap and upstream timeout. These demo routes have no user authentication; configure deployment access controls and gateway-level rate/usage limits before using paid credentials publicly. In-memory limits are shared by users of one instance and reset on restart; they do not coordinate across instances.

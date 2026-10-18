@@ -4,7 +4,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Apple Stock (AAPL)",
     type: "card" as const,
-    apiUrl: `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL&apikey=${process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY}`,
+    apiUrl: `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=AAPL`,
     refreshInterval: 60,
     selectedFields: [
       "Global Quote.01. symbol",
@@ -22,7 +22,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Tesla Overview",
     type: "card" as const,
-    apiUrl: `https://www.alphavantage.co/query?function=OVERVIEW&symbol=TSLA&apikey=${process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY}`,
+    apiUrl: `https://www.alphavantage.co/query?function=OVERVIEW&symbol=TSLA`,
     refreshInterval: 300,
     selectedFields: [
       "Symbol",
@@ -41,7 +41,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Microsoft Stock",
     type: "chart" as const,
-    apiUrl: `https://finnhub.io/api/v1/quote?symbol=MSFT&token=${process.env.NEXT_PUBLIC_FINNHUB_API_KEY}`,
+    apiUrl: `https://finnhub.io/api/v1/quote?symbol=MSFT`,
     refreshInterval: 60,
     selectedFields: [
       "c", // current price
@@ -59,7 +59,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Amazon Profile",
     type: "card" as const,
-    apiUrl: `https://finnhub.io/api/v1/stock/profile2?symbol=AMZN&token=${process.env.NEXT_PUBLIC_FINNHUB_API_KEY}`,
+    apiUrl: `https://finnhub.io/api/v1/stock/profile2?symbol=AMZN`,
     refreshInterval: 300,
     selectedFields: [
       "name",
@@ -78,7 +78,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Market Movers",
     type: "table" as const,
-    apiUrl: `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS&apikey=${process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY}`,
+    apiUrl: `https://www.alphavantage.co/query?function=TOP_GAINERS_LOSERS`,
     refreshInterval: 300,
     selectedFields: [
       "top_gainers.0.ticker",
@@ -98,7 +98,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Bitcoin Price",
     type: "card" as const,
-    apiUrl: `https://finnhub.io/api/v1/crypto/candle?symbol=BINANCE:BTCUSDT&resolution=1&from=${Math.floor(Date.now()/1000) - 86400}&to=${Math.floor(Date.now()/1000)}&token=${process.env.NEXT_PUBLIC_FINNHUB_API_KEY}`,
+    apiUrl: `https://finnhub.io/api/v1/crypto/candle?symbol=BINANCE:BTCUSDT&resolution=1&from=${Math.floor(Date.now()/1000) - 86400}&to=${Math.floor(Date.now()/1000)}`,
     refreshInterval: 30,
     selectedFields: [
       "c.0", // latest close price
@@ -116,7 +116,7 @@ export const premiumWidgetConfigs = [
   {
     name: "Google Stock Aggs",
     type: "chart" as const,
-    apiUrl: `https://api.polygon.io/v2/aggs/ticker/GOOGL/prev?adjusted=true&apikey=${process.env.NEXT_PUBLIC_POLYGON_API_KEY}`,
+    apiUrl: `https://api.polygon.io/v2/aggs/ticker/GOOGL/prev?adjusted=true`,
     refreshInterval: 300,
     selectedFields: [
       "results.0.c", // close

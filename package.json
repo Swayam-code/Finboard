@@ -3,7 +3,15 @@
   "version": "1.0.0",
   "description": "Customizable real-time finance dashboard with API integration",
   "private": true,
-  "keywords": ["finance", "dashboard", "react", "nextjs", "typescript", "api", "widgets"],
+  "keywords": [
+    "finance",
+    "dashboard",
+    "react",
+    "nextjs",
+    "typescript",
+    "api",
+    "widgets"
+  ],
   "author": "FinBoard Team",
   "license": "MIT",
   "scripts": {
@@ -27,7 +35,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.542.0",
-    "next": "15.5.2",
+    "next": "15.5.28",
     "react": "19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "19.1.0",
@@ -44,7 +52,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.2",
+    "eslint-config-next": "15.5.28",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
